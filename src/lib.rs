@@ -34,13 +34,37 @@
 //! ```
 
 pub trait SmoothBytes {
+    /// Returns `true` if the bit at `bit` is set.
+    ///
+    /// Out-of-range indexes return `false`.
     fn get_bit(&self, bit: usize) -> bool;
+
+    /// Returns all set bit indexes in ascending order.
     fn get_set_bits(&self) -> Vec<usize>;
+
+    /// Returns all set bit indexes as `u8` values.
+    ///
+    /// This is a compatibility alias for older callers. It panics if any set
+    /// bit index does not fit into `u8`.
     fn get_signs_bits(&self) -> Vec<u8>;
+
+    /// Sets the bit at `bit`.
+    ///
+    /// Out-of-range indexes are ignored.
     fn set_bit(&mut self, bit: usize);
+
+    /// Clears the bit at `bit`.
+    ///
+    /// Out-of-range indexes are ignored.
     fn reset_bit(&mut self, bit: usize);
+
+    /// Applies a bitwise OR mask to the byte slice.
     fn or_mask<T: Into<u128>>(&mut self, mask: T);
+
+    /// Applies a bitwise AND mask to the byte slice.
     fn and_mask<T: Into<u128>>(&mut self, mask: T);
+
+    /// Returns `true` if all bytes are zero.
     fn is_zero(&self) -> bool;
 }
 
@@ -106,35 +130,39 @@ mod tests {
         use super::*;
         #[test]
         fn test_get_bit_ar_1() {
-            assert_eq!([3, 233].get_bit(2), false);
+            assert!(![3, 233].get_bit(2));
         }
         #[test]
         fn test_get_bit_ar_2() {
-            assert_eq!([3, 233].get_bit(16), false)
+            assert!(![3, 233].get_bit(16))
         }
         #[test]
         fn test_get_bit_ar_3() {
-            assert_eq!([3, 233].get_bit(20), false)
+            assert!(![3, 233].get_bit(20))
         }
         #[test]
         fn test_get_bit_ar_4() {
-            assert_eq!([3, 233].get_bit(8), true)
+            assert!([3, 233].get_bit(8))
         }
         #[test]
         fn test_get_bit_vec_1() {
-            assert_eq!(vec![3, 233].get_bit(2), false)
+            let x = Vec::from([3, 233]);
+            assert!(!x.get_bit(2))
         }
         #[test]
         fn test_get_bit_vec_2() {
-            assert_eq!(vec![3, 233].get_bit(16), false)
+            let x = Vec::from([3, 233]);
+            assert!(!x.get_bit(16))
         }
         #[test]
         fn test_get_bit_vec_3() {
-            assert_eq!(vec![3, 233].get_bit(20), false)
+            let x = Vec::from([3, 233]);
+            assert!(!x.get_bit(20))
         }
         #[test]
         fn test_get_bit_vec_4() {
-            assert_eq!(vec![3, 233].get_bit(8), true)
+            let x = Vec::from([3, 233]);
+            assert!(x.get_bit(8))
         }
     }
     mod set_bit {
@@ -143,7 +171,7 @@ mod tests {
         fn test_set_bit_ar_1() {
             let mut x = [3, 233];
             x.set_bit(2);
-            assert_eq!(x.get_bit(2), true);
+            assert!(x.get_bit(2));
             assert_eq!(x[1], 237);
             assert_eq!(x, [3, 237]);
         }
@@ -151,7 +179,7 @@ mod tests {
         fn test_set_bit_ar_2() {
             let mut x = [3, 233];
             x.set_bit(16);
-            assert_eq!(x.get_bit(16), false);
+            assert!(!x.get_bit(16));
             assert_eq!(x[1], 233);
             assert_eq!(x, [3, 233]);
         }
@@ -159,7 +187,7 @@ mod tests {
         fn test_set_bit_ar_3() {
             let mut x = [3, 233];
             x.set_bit(3);
-            assert_eq!(x.get_bit(3), true);
+            assert!(x.get_bit(3));
             assert_eq!(x[1], 233);
             assert_eq!(x, [3, 233]);
         }
@@ -167,7 +195,7 @@ mod tests {
         fn test_set_bit_ar_4() {
             let mut x = [3, 233];
             x.set_bit(10);
-            assert_eq!(x.get_bit(10), true);
+            assert!(x.get_bit(10));
             assert_eq!(x[0], 7);
             assert_eq!(x, [7, 233]);
         }
@@ -175,7 +203,7 @@ mod tests {
         fn test_set_bit_vec_1() {
             let mut x = vec![3, 233];
             x.set_bit(2);
-            assert_eq!(x.get_bit(2), true);
+            assert!(x.get_bit(2));
             assert_eq!(x[1], 237);
             assert_eq!(x, vec![3, 237]);
         }
@@ -183,7 +211,7 @@ mod tests {
         fn test_set_bit_vec_2() {
             let mut x = vec![3, 233];
             x.set_bit(16);
-            assert_eq!(x.get_bit(16), false);
+            assert!(!x.get_bit(16));
             assert_eq!(x[1], 233);
             assert_eq!(x, vec![3, 233]);
         }
@@ -191,7 +219,7 @@ mod tests {
         fn test_set_bit_vec_3() {
             let mut x = vec![3, 233];
             x.set_bit(3);
-            assert_eq!(x.get_bit(3), true);
+            assert!(x.get_bit(3));
             assert_eq!(x[1], 233);
             assert_eq!(x, vec![3, 233]);
         }
@@ -199,18 +227,18 @@ mod tests {
         fn test_set_bit_vec_4() {
             let mut x = vec![3, 233];
             x.set_bit(10);
-            assert_eq!(x.get_bit(10), true);
+            assert!(x.get_bit(10));
             assert_eq!(x[0], 7);
             assert_eq!(x, vec![7, 233]);
         }
     }
-    mod tes_reset_bit {
+    mod reset_bit {
         use super::*;
         #[test]
         fn test_reset_bit_ar_1() {
             let mut x = [3, 233];
             x.reset_bit(3);
-            assert_eq!(x.get_bit(3), false);
+            assert!(!x.get_bit(3));
             assert_eq!(x[1], 225);
             assert_eq!(x, [3, 225]);
         }
@@ -218,7 +246,7 @@ mod tests {
         fn test_reset_bit_ar_2() {
             let mut x = [3, 233];
             x.reset_bit(16);
-            assert_eq!(x.get_bit(16), false);
+            assert!(!x.get_bit(16));
             assert_eq!(x[1], 233);
             assert_eq!(x, [3, 233]);
         }
@@ -226,7 +254,7 @@ mod tests {
         fn test_reset_bit_ar_3() {
             let mut x = [3, 233];
             x.reset_bit(2);
-            assert_eq!(x.get_bit(2), false);
+            assert!(!x.get_bit(2));
             assert_eq!(x[1], 233);
             assert_eq!(x, [3, 233]);
         }
@@ -234,7 +262,7 @@ mod tests {
         fn test_reset_bit_ar_4() {
             let mut x = [3, 233];
             x.reset_bit(9);
-            assert_eq!(x.get_bit(9), false);
+            assert!(!x.get_bit(9));
             assert_eq!(x[0], 1);
             assert_eq!(x, [1, 233]);
         }
@@ -242,7 +270,7 @@ mod tests {
         fn test_reset_bit_vec_1() {
             let mut x = vec![3, 233];
             x.reset_bit(3);
-            assert_eq!(x.get_bit(3), false);
+            assert!(!x.get_bit(3));
             assert_eq!(x[1], 225);
             assert_eq!(x, vec![3, 225]);
         }
@@ -250,7 +278,7 @@ mod tests {
         fn test_reset_bit_vec_2() {
             let mut x = vec![3, 233];
             x.reset_bit(16);
-            assert_eq!(x.get_bit(16), false);
+            assert!(!x.get_bit(16));
             assert_eq!(x[1], 233);
             assert_eq!(x, vec![3, 233]);
         }
@@ -258,7 +286,7 @@ mod tests {
         fn test_reset_bit_vec_3() {
             let mut x = vec![3, 233];
             x.reset_bit(2);
-            assert_eq!(x.get_bit(2), false);
+            assert!(!x.get_bit(2));
             assert_eq!(x[1], 233);
             assert_eq!(x, vec![3, 233]);
         }
@@ -266,7 +294,7 @@ mod tests {
         fn test_reset_bit_vec_4() {
             let mut x = vec![3, 233];
             x.reset_bit(9);
-            assert_eq!(x.get_bit(9), false);
+            assert!(!x.get_bit(9));
             assert_eq!(x[0], 1);
             assert_eq!(x, vec![1, 233]);
         }
