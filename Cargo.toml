@@ -1,0 +1,11 @@
+[package]
+name = "smooth-bytes"
+version = "0.1.0"
+edition = "2021"
+description = "Convenience bit operations for byte slices"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+keywords = ["bits", "bytes", "bitmask", "bitset"]
+categories = ["data-structures", "encoding"]
+
+[dependencies]
